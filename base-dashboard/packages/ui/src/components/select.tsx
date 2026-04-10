@@ -21,7 +21,11 @@ export function Select({ value, onChange, options, className }: Props) {
           (className ?? "")
         }
       >
-        <BaseSelect.Value />
+        <BaseSelect.Value>
+          {(value) =>
+            options.find((o) => o.value === value)?.label ?? String(value ?? "")
+          }
+        </BaseSelect.Value>
         <BaseSelect.Icon>
           <svg
             width="10"
