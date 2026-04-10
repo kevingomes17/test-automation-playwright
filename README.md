@@ -1,5 +1,9 @@
 # dashboard-and-playwright
 
+> 📊 **Live Allure test report:** **https://kevingomes17.github.io/dashboard-and-playwright/**
+>
+> Published from CI on every push to `main`. Shows the latest run grouped by epic/feature/story, severity badges, pass-rate and duration trend graphs across the last 30 runs, and per-test history. For details on how it's wired up, see the [Allure report](#allure-report-with-history) section below.
+
 A microservices observability dashboard built with React + Vite + Tailwind, paired with a Playwright e2e suite that exercises it. Two sibling projects in one repo:
 
 ```
@@ -141,7 +145,7 @@ The workflow also uses Playwright's `github` reporter, so any failed assertions 
 Alongside the built-in Playwright report, the workflow also publishes an **Allure report** with severity/feature/owner grouping and trend graphs across runs.
 
 - **On every run** (push and PR), the report is uploaded as an artifact named **`allure-report`** at the bottom of the run summary page — same download/unzip flow as `playwright-report` above. Open `index.html` in any browser, no server needed.
-- **On `main` pushes**, the same report is also published to **GitHub Pages**: `https://<owner>.github.io/<repo>/`. Each main push appends to a 30-run history kept in the `gh-pages` branch, so the report's home page shows pass-rate trends, duration trends, and per-test history arrows. PRs do not update Pages — only artifact uploads.
+- **On `main` pushes**, the same report is also published to **GitHub Pages**: **https://kevingomes17.github.io/dashboard-and-playwright/**. Each main push appends to the run history kept in the `gh-pages` branch, so the report's home page shows pass-rate trends, duration trends, and per-test history arrows. PRs do not update Pages — only artifact uploads.
 
 **One-time setup the first time you push the workflow:** in the GitHub repo settings, enable **Pages → Source: Deploy from a branch → `gh-pages` / `(root)`**. The first workflow run on `main` creates the branch; until Pages is enabled the URL will 404. The workflow already has `permissions: contents: write` so the default `GITHUB_TOKEN` can push to `gh-pages`.
 
