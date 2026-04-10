@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(pkill -f \"vite$\\\\|turbo dev\")",
+      "WebFetch(domain:base-ui.com)"
+    ]
+  }
+}
