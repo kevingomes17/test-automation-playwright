@@ -120,7 +120,62 @@ This opens Playwright's trace viewer with DOM snapshots, network logs, and a fra
 
 The workflow also uses Playwright's `github` reporter, so any failed assertions appear as **annotations directly on the workflow run page** and on the PR's "Files changed" tab — no need to download the artifact for a quick triage.
 
+## Generating new Playwright tests with Claude Code
+
+This repo is set up so you can author new e2e tests by **driving a real browser through Claude Code** instead of writing them by hand. Claude opens a browser via the global `playwright-cli` tool, you tell it what user flow to record, and it emits a complete Playwright spec into `playwright/tests/`.
+
+### Prerequisites
+
+1. **Claude Code CLI** — install per the [official instructions](https://docs.claude.com/claude-code).
+2. **`playwright-cli` (global)** — a separate CLI that lets Claude open and interact with a real browser:
+   ```bash
+   npm install -g playwright-cli
+   ```
+3. **The `playwright-cli` skill** is already in this repo at `.claude/skills/playwright-cli/SKILL.md` (with reference docs under `.claude/skills/playwright-cli/references/`). Claude Code auto-discovers it when you run `claude` from the repo root.
+
+### Workflow
+
+1. Start the dashboard so there's something to test against:
+   ```bash
+   cd base-dashboard && npm run dev
+   ```
+2. In another terminal, from the **repo root**, start Claude Code:
+   ```bash
+   cd /path/to/dashboard-and-playwright
+   claude
+   ```
+3. Ask Claude to generate a test, describing the flow in plain English. For example:
+   > Generate a Playwright test that opens the dashboard, switches the latency chart to the `payments` service, and verifies the chart re-renders. Save it to `playwright/tests/payments-filter.spec.ts`.
+
+   Behind the scenes Claude will:
+   - Invoke the `playwright-cli` skill (the SKILL.md explains the available commands).
+   - Run `playwright-cli open http://localhost:5173` to launch a browser.
+   - Use `playwright-cli snapshot` to read the accessibility tree and find element refs.
+   - Drive the page with `click`, `fill`, `select`, `hover`, etc. — every action prints the equivalent Playwright TypeScript code (`await page.getByRole(...).click()`).
+   - Stitch the generated lines into a `@playwright/test` spec, applying this repo's conventions (scope queries to `page.locator("main")`, use `getByRole("combobox")` for Selects, use the deterministic mock data).
+   - Write the file under `playwright/tests/` and run it once with `npx playwright test` to confirm it passes.
+
+4. Review the generated spec, tweak as needed, and commit.
+
+### Useful skill references
+
+The `playwright-cli` skill ships with focused reference files Claude can pull in on demand:
+
+- `.claude/skills/playwright-cli/references/test-generation.md` — how raw `playwright-cli` actions become Playwright TypeScript.
+- `.claude/skills/playwright-cli/references/playwright-tests.md` — conventions for writing `@playwright/test` files.
+- `.claude/skills/playwright-cli/references/element-attributes.md` — picking stable locators from the snapshot.
+- `.claude/skills/playwright-cli/references/request-mocking.md`, `tracing.md`, `video-recording.md`, `storage-state.md`, `session-management.md`, `running-code.md` — situational helpers.
+
+You can also tell Claude to consult them explicitly: *"Read `.claude/skills/playwright-cli/references/request-mocking.md` and stub the `/api/services` endpoint in this test."*
+
+### Tips
+
+- **Be specific about the assertion.** "Click the orders option and verify the trigger now reads `orders`" produces a tighter test than "test the dropdown".
+- **Point Claude at an existing spec** (e.g. `playwright/tests/charts.spec.ts`) and ask it to follow the same patterns — it'll match the locator scoping and helper style automatically.
+- **Run the test before committing.** Ask Claude to execute `npx playwright test path/to/new.spec.ts` and iterate if it fails. The deterministic mock client (`base-dashboard/apps/web/src/lib/metrics/mock-client.ts`) means a passing run is a stable run.
+
 ## Project documentation
 
 - `.claude/CLAUDE.md` — guidance for Claude Code working in this repo (architecture overview, conventions, known caveats).
 - `.claude/skills/base-ui/SKILL.md` — index of Base UI component docs.
+- `.claude/skills/playwright-cli/SKILL.md` — browser automation commands for generating Playwright tests.
