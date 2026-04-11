@@ -208,3 +208,4 @@ You can also tell Claude to consult them explicitly: *"Read `.claude/skills/play
 - `.claude/CLAUDE.md` — guidance for Claude Code working in this repo (architecture overview, conventions, known caveats).
 - `.claude/skills/base-ui/SKILL.md` — index of Base UI component docs.
 - `.claude/skills/playwright-cli/SKILL.md` — browser automation commands for generating Playwright tests.
+
